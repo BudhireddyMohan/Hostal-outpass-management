@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 40px;
+      background: linear-gradient(to bottom right, #e6f0ff, #ffffff);
+      color: #2d3748;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      border-bottom: 2px solid #cbd5e0;
+      padding-bottom: 15px;
+    }
+
+    header h1 {
+      font-size: 30px;
+      color: #2b6cb0;
+    }
+
+    #Student-dash-board-upper-right-studentId h2 {
+      font-size: 20px;
+      color: #4a5568;
+    }
+
+    h2 {
+      margin-top: 30px;
+      font-size: 24px;
+      color: #2b6cb0;
+    }
+      .logout-btn {
+    background-color: #dc3545; /* Red */
+    color: white;
+    padding: 10px 18px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .logout-btn:hover {
+    background-color: #e55353; /* Light red on hover */
+  }
+
+    .input-row {
+      display: flex;
+      gap: 15px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    input, textarea {
+      padding: 10px;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 250px;
+      background-color: #fff;
+    }
+
+    .submit-btn {
+      background-color: #2b6cb0;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .submit-btn:hover {
+      background-color: #1a4d8f;
+    }
+
+    .card {
+      padding: 20px;
+      background-color: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      margin-top: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background-color: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+      font-size: 15px;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      color: #2b6cb0;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+
+    .dot {
+      height: 12px;
+      width: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .approved {
+      background-color: #38a169;
+    }
+
+    .rejected {
+      background-color: #e53e3e;
+    }
+
+    .pending {
+      background-color: #d69e2e;
+    }
+
+    @media (max-width: 600px) {
+      .input-row {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  
+  <h1>Student Dashboard</h1>
+ <div id="Student-dash-board-upper-right-studentId"></div>
+<script>
+window.onload = function () {
+  const urlParams = new URLSearchParams(window.location.search);
+  const studentId = urlParams.get("id");
+  const studentname = urlParams.get("name");
+
+  // Only set localStorage if values exist
+  if (studentId && studentname) {
+    localStorage.setItem("studentId", studentId);
+    localStorage.setItem("studentname", studentname);
+  }
+
+  const webpage_studentId = localStorage.getItem("studentId") || "Unknown ID";
+  const webpage_studentname = localStorage.getItem("studentname") || "Unknown Name";
+
+  console.log("webpage_studentname="+webpage_studentname+" webpage_studentId ="+ webpage_studentId  );
+  const target = document.getElementById("Student-dash-board-upper-right-studentId");
+  if (target) {
+    target.innerHTML = `<h2>${webpage_studentId} (${webpage_studentname})</h2>`;
+  } else {
+    console.error("Element with ID 'Student-dash-board-upper-right-studentId' not found.");
+  }
+}
+</script>
+<!------------------------------------------------Request Outpasse--------------------------------------------------------------------->
+
+
+
+ <button class="logout-btn" id="logout">Logout</button>
+      <script>
+        document.getElementById("logout").addEventListener("click",function(){
+          window.location.href = "http://localhost:8080/logout-to-loginpage"
+        })
+      </script>
+</header>
+<h2> Request Outpasse </h2>
+<form class="input-row" action="/submit-outpass" method="post">
+  <input type="date" name="date" required>
+  <input type="time" name="time" required>
+  <input type="text" name="reason" placeholder="Reason" required>
+
+  <input type="hidden" name="studentId" id="webpage_studentId">
+
+  <button class="submit-btn" type="submit">Submit Request</button>
+</form>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const studentId = localStorage.getItem("studentId");
+    const hiddenInput = document.getElementById("webpage_studentId");
+    if (hiddenInput && studentId) {
+      hiddenInput.value = studentId;
+    }
+  });
+</script>
+
+<!----------------------------------------Current Outpass Status------------------------------------------------------>
+ 
+<section>
+  <h2>Current Outpass Status</h2>
+
+  <div class="card" id="outpassDetails" style="margin-top: 20px;">
+    <p style="font-style: italic; color: #718096;">Loading current outpass...</p>
+  </div>
+</section>
+
+<script>
+  // Auto-run when page loads
+  window.addEventListener("DOMContentLoaded", async () => {
+  const studentId = localStorage.getItem("studentId");
+
+  try {
+    const response = await fetch("http://localhost:8080/view_current_outpass_status", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ studentid: parseInt(studentId) })
+    });
+
+    const data = await response.json();
+    console.log("Current out pass details:", data);
+
+    const card = document.querySelector(".card");
+    card.innerHTML = ""; // Clear existing content
+
+    if (!data || !data.status || data.status === "none") {
+      card.innerHTML = "<p>No current outpass request submitted.</p>";
+      return;
+    }
+
+    // ✅ Now define statusColorClass AFTER ensuring data.status exists
+    const statusColorClass = {
+      "pending": "pending",
+      "approved": "approved",
+      "rejected": "rejected"
+    }[data.status.toLowerCase()] || "pending";
+
+    card.innerHTML = `
+      <p><strong>Outpass Date:</strong> ${data.outpassdate}</p>
+      <p><strong>Outpass Time:</strong> ${data.outpasstime}</p>
+      <p><strong>Reason:</strong> ${data.reason}</p>
+      <p class="status">
+        <span class="dot ${statusColorClass}"></span>
+        <strong>Status:</strong> ${data.status}
+      </p>
+    `;
+  } catch (err) {
+    console.error("Error fetching current outpass:", err);
+    document.querySelector(".card").innerHTML = "<p>Error loading current outpass details.</p>";
+  }
+});
+
+</script>
+
+<!------------------------------------------------History of Past Outpasses---------------------------------------------->
+<section>
+  <h2>History of Past Outpasses</h2>
+  <div id="historyTable" class="card">
+    <p style="font-style: italic; color: #718096;">Loading history...</p>
+  </div>
+</section>
+
+<script>
+  window.addEventListener("DOMContentLoaded", async () => {
+    const studentId = localStorage.getItem("studentId");
+
+    try {
+      const response = await fetch("http://localhost:8080/Outpass-history", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ studentid: parseInt(studentId) })
+      });
+
+      const historyList = await response.json();
+      console.log("Outpass History:", historyList);
+
+      const container = document.getElementById("historyTable");
+
+      if (!Array.isArray(historyList) || historyList.length === 0) {
+        container.innerHTML = "<p>No outpass history available.</p>";
+        return;
+      }
+
+      let table = `
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Reason</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      historyList.forEach(entry => {
+        const statusClass = {
+          "accepted": "approved",
+          "pending": "pending",
+          "rejected": "rejected"
+        }[entry.status.toLowerCase()] || "pending";
+
+        table += `
+          <tr>
+            <td>${entry.outpass_date}</td>
+            <td>${entry.outpass_time}</td>
+            <td>${entry.reason}</td>
+            <td><div class="status"><span class="dot ${statusClass}"></span> ${entry.status}</div></td>
+          </tr>
+        `;
+      });
+
+      table += `</tbody></table>`;
+      container.innerHTML = table;
+
+    } catch (err) {
+      console.error("Error fetching history:", err);
+      document.getElementById("historyTable").innerHTML = "<p style='color:red;'>Error loading history.</p>";
+    }
+  });
+</script>
+
+</body>
+</html>
